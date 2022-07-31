@@ -1,4 +1,9 @@
+
+
+
+
 # ts-all-in-one
+
 - [typescript 공식문서](https://www.typescriptlang.org/)
 - [typescript 플레이그라운드](https://www.typescriptlang.org/play)
 - [typescript 핸드북 필독](https://www.typescriptlang.org/docs/handbook/intro.html)
@@ -273,7 +278,9 @@ type B = {
     b: string;
 }
 
+// union
 const aa: A | B = { a: 'hello', b: 'world' };
+//intersection
 const bb: A & B = { a: 'hello', b: 'world' };
 
 
@@ -315,12 +322,87 @@ interface BB extends AA {
 const d: BB = {breath: true, bread: true}
 ```
 
-- void 타입은 return값을 사용하지 안 겠다는 뜻(메서드나 매개변수에서는 리턴값 사용 가능, but 조심해야 함)
+* 인터페이스 병합
+  * 같은 이름으로 된 인터페이스들은 중복에러가 뜨지 않고 병합된다, 언제든 확장가능
+
 ```typescript
-declare function forEach<T>(arr: T[], callback: (el: T) => undefined): void;
+// 인터페이스 병합/확장
+interface In {
+    talk: () => void
+}
+interface In {
+    eat: () => void
+    
+}
+interface In {
+    shit: () => void
+}
+
+const abc: In = {talk() {}, eat() {}, shit() {}, sleep() {}}
+
+interface In {
+    sleep: () => void
+}
+
+```
+
+- 잉여 속성 검사
+
+```typescript
+//////////// 잉여속성 검사
+interface ABC {a:string}
+
+///// 1. 이때는 에러남
+const obj33: ABC = {a: 'hello', b: 'world'}
+///// 2. 잉여속성검사 - 에러 안남, 그래서 많이 헷갈림
+const obj44 = {a: 'hello', b: 'world'}
+const obj55: ABC = obj44;
+```
+
+
+
+- void 타입은 return값을 사용하지 안 겠다는 뜻(**메서드나 매개변수에서는 리턴값 사용 가능, but 조심해야 함**)
+
+```
+나의 코드
+////// void
+// string형식은 void형식에 할당 불가
+// undefined는 가능,  null은 불가능
+
+// 1. function void - return 값이 void - return값이 없다
+function abbbb(): void {
+    // return '3'
+    return undefined
+}
+
+const bcccc = abbbb();
+
+
+// 2. method void - method가 void함수가 들어감 - return값을 사용하지 않겠다
+interface Humana {
+    talk: () => void;
+}
+const humana: Humana = {
+    talk() {return 'abc'};
+}
+
+// 3. 매개변수로 선언한 void - 매개변수가 void로 들어간 경우 - return값 사용 x
+function abcb(callback: () => void): void {
+    // return '3'
+    return undefined
+}
+```
+
+```typescript
+declare function forEach(arr: number[], callback: (el: number) => undefined): void;
+// 매개변수에서 void는 return값 상관 안함
 // declare function forEach<T>(arr: T[], callback: (el: T) => void): void;
 let target: number[] = [];
+// number형식 undefined
 forEach([1, 2, 3], el => target.push(el));
+// void형식 undefined
+forEach([1, 2, 3], el => {target.push(el)});
+
 
 interface A {
     talk: () => void;
@@ -328,8 +410,58 @@ interface A {
 const a: A = {
     talk() { return 3; }
 }
+// 값이 3? no 
+// talk의 method가 void이기 때문에 return값을 무시
+// b의 type이 void가 됨
+const b = a.talk();
 ```
+
+
+
+- 타입스크립트 네이밍 룰 - 크게 2가지
+
+  - 구버전
+
+    ```
+    // 구버전 - 영어 맨앞 붙였었음
+    interface IProps {}
+    type Ttype = string|number; 
+    enum EHello {}
+    ```
+
+  - 현버전 - 안붙임 안붙여도 마우스 올리면 타입이 다 나오기 때문
+
+    ```
+    // 현재
+    interface Props {}
+    type type = string|number; 
+    enum Hello {}
+    
+    const abcd: Props = {}
+    ```
+
+* unknown vs any
+
+```typescript
+// any : 타입탐색을 완전히 포기
+const ccb: any = avvc.talk();
+
+// unknown 타입 정확히 모르겠을 때, 내가 직접 정의 가능
+const cccc: unknown = avvc.talk();
+(cccc as AVVC).talk();
+
+// unknown 많이 사용하는 경우 - Error
+try {
+
+    // error의 경우 unknown으로 뜸 => as로 정의
+} catch(error) {
+    (error as Error).message 
+}
+
+```
+
 - 타입만 선언하고 싶을 때 declare(구현은 다른 파일에 있어야 함)
+  - 다른 파일에 있는걸 내가 입증할게! 
 ```typescript
 declare const a: string;
 declare function a(x: number): number;
@@ -338,10 +470,16 @@ declare class A {}
 // 추후 declare module, declare global, declare namespace도 배움
 ```
 
-- 타입간 대입 가능 표
-![image](https://user-images.githubusercontent.com/10962668/179646513-3c3be896-3bbc-4784-848b-06bc47e8b129.png)
+- 타입간 대입 가능 표 
+  - any는 void에 대입 가능하다
+  - undefined는 void대입 가능하다
+  - null은 void에 할당 불가
+  - 외울 필요는 없음 - 에러 메세지 나옴
+- ![image](https://user-images.githubusercontent.com/10962668/179646513-3c3be896-3bbc-4784-848b-06bc47e8b129.png)
 
-- 타입 가드
+
+
+- 타입 가드 - 실무에서 잘 쓰임
 ```typescript
 function numOrStr(a: number | string) {
   if (typeof a === 'string') {

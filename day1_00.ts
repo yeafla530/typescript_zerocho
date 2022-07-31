@@ -212,13 +212,91 @@ interface In {
     sleep: () => void
 }
 
-// void - 메소드나 콜백함수할 때 그때의 void가 undefined와 다름
-interface ABC {
-    talk: () => void
+////// interface vs type
+interface ABB {a:string}
+interface ABB {b:string}
+const obj11: ABB = {a: 'hello', b: 'world'}
+
+// type은 병합 안됨
+type BBB = {a:string}
+type BBB = {b:string}
+
+const obj22: BBB = {a: 'hello', b: 'world'}
+
+
+//////////// 잉여속성 검사
+interface ABC {a:string}
+
+///// 1. 이때는 에러남
+const obj33: ABC = {a: 'hello', b: 'world'}
+///// 2. 잉여속성검사 - 에러 안남, 그래서 많이 헷갈림
+const obj44 = {a: 'hello', b: 'world'}
+const obj55: ABC = obj44;
+
+
+////// void
+// string형식은 void형식에 할당 불가
+// undefined는 가능,  null은 불가능
+
+// 1. function void - return 값이 void - return값이 없다
+function abbbb(): void {
+    // return '3'
+    return undefined
 }
 
-const abbb: ABC = {
-    talk() {return 3;}
+const bcccc = abbbb();
+
+
+// 2. method void - method가 void함수가 들어감 - return값을 사용하지 않겠다
+interface Humana {
+    talk: () => void;
+}
+const humana: Humana = {
+    talk() {return 'abc'};
+}
+
+// 3. 매개변수로 선언한 void - 매개변수가 void로 들어간 경우 - return값 사용 x
+function abcb(callback: () => void): void {
+    // return '3'
+    return undefined
+}
+
+// 예시1
+declare function forEach(arr: number[], callback: (el: number) => undefined): void;
+// 매개변수에서 void는 return값 상관 안함
+// declare function forEach<T>(arr: T[], callback: (el: T) => void): void;
+let target: number[] = [];
+// nu
+forEach([1, 2, 3], el => target.push(el));
+forEach([1, 2, 3], el => {target.push(el)});
+
+
+// 예시2
+interface AVVC {
+    talk: () => void;
+}
+const avvc: AVVC = {
+    talk() { return 3; }
+}
+// 값이 3? no 
+// talk의 method가 void이기 때문에 return값을 무시
+// b의 type이 void가 됨
+const bbbbb = avvc.talk();
+
+//////////// unknown vs any
+// any : 타입탐색을 완전히 포기
+const ccb: any = avvc.talk();
+
+// unknown 타입 정확히 모르겠을 때, 내가 직접 정의 가능
+const cccc: unknown = avvc.talk();
+(cccc as AVVC).talk();
+
+// unknown 많이 사용하는 경우 - Error
+try {
+
+    // error의 경우 unknown으로 뜸 => as로 정의
+} catch(error) {
+    (error as Error).message 
 }
 
 
@@ -234,3 +312,6 @@ type type = string|number;
 enum Hello {}
 
 const abcd: Props = {}
+
+
+
